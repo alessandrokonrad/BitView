@@ -1,0 +1,6 @@
+com.example.myapp
+drawable launch_background
+drawable toast_bg
+mipmap ic_app
+mipmap ic_launcher
+style LaunchTheme

@@ -1,0 +1,10 @@
+com.example.myapp.BuildConfig
+com.example.myapp.R
+com.example.myapp.R$drawable
+com.example.myapp.R$mipmap
+com.example.myapp.R$style
+io.github.ponnamkarthik.toast.fluttertoast.BuildConfig
+io.github.ponnamkarthik.toast.fluttertoast.R:
+    10:10:private R()
+io.github.ponnamkarthik.toast.fluttertoast.R$drawable:
+    13:13:private R$drawable()

@@ -1,0 +1,50 @@
+[
+    {
+        "merged": "/home/alessandro/myapp/build/app/intermediates/res/merged/release/drawable_toast_bg.xml.flat",
+        "source": "/home/alessandro/myapp/build/fluttertoast/intermediates/packaged_res/release/drawable/toast_bg.xml"
+    },
+    {
+        "merged": "/home/alessandro/myapp/build/app/intermediates/res/merged/release/mipmap-xxxhdpi_ic_app.png.flat",
+        "source": "/home/alessandro/myapp/android/app/src/main/res/mipmap-xxxhdpi/ic_app.png"
+    },
+    {
+        "merged": "/home/alessandro/myapp/build/app/intermediates/res/merged/release/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "/home/alessandro/myapp/android/app/src/main/res/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/home/alessandro/myapp/build/app/intermediates/res/merged/release/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "/home/alessandro/myapp/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/home/alessandro/myapp/build/app/intermediates/res/merged/release/mipmap-xxhdpi_ic_app.png.flat",
+        "source": "/home/alessandro/myapp/android/app/src/main/res/mipmap-xxhdpi/ic_app.png"
+    },
+    {
+        "merged": "/home/alessandro/myapp/build/app/intermediates/res/merged/release/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "/home/alessandro/myapp/android/app/src/main/res/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/home/alessandro/myapp/build/app/intermediates/res/merged/release/drawable_launch_background.xml.flat",
+        "source": "/home/alessandro/myapp/android/app/src/main/res/drawable/launch_background.xml"
+    },
+    {
+        "merged": "/home/alessandro/myapp/build/app/intermediates/res/merged/release/mipmap-xhdpi_ic_app.png.flat",
+        "source": "/home/alessandro/myapp/android/app/src/main/res/mipmap-xhdpi/ic_app.png"
+    },
+    {
+        "merged": "/home/alessandro/myapp/build/app/intermediates/res/merged/release/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "/home/alessandro/myapp/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/home/alessandro/myapp/build/app/intermediates/res/merged/release/mipmap-hdpi_ic_app.png.flat",
+        "source": "/home/alessandro/myapp/android/app/src/main/res/mipmap-hdpi/ic_app.png"
+    },
+    {
+        "merged": "/home/alessandro/myapp/build/app/intermediates/res/merged/release/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "/home/alessandro/myapp/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/home/alessandro/myapp/build/app/intermediates/res/merged/release/mipmap-mdpi_ic_app.png.flat",
+        "source": "/home/alessandro/myapp/android/app/src/main/res/mipmap-mdpi/ic_app.png"
+    }
+]

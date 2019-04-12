@@ -1,0 +1,4 @@
+# Referenced at /home/alessandro/myapp/build/app/intermediates/merged_manifests/release/processReleaseManifest/merged/AndroidManifest.xml:23
+-keep class com.example.myapp.MainActivity { <init>(...); }
+# Referenced at /home/alessandro/myapp/build/app/intermediates/merged_manifests/release/processReleaseManifest/merged/AndroidManifest.xml:19
+-keep class io.flutter.app.FlutterApplication { <init>(...); }
