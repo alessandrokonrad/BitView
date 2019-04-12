@@ -1,4 +1,0 @@
-#Fri Apr 12 17:00:32 CEST 2019
-base.0=/home/alessandro/myapp/build/app/intermediates/transforms/dexMerger/release/0
-path.0=classes.dex
-renamed.0=classes.dex
