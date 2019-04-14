@@ -1,4 +1,4 @@
-![ic_app](https://user-images.githubusercontent.com/35738310/56089890-3c3b3b00-5e9a-11e9-9976-bc6488f2dfe1.png)
+![ic_app](https://user-images.githubusercontent.com/35738310/56090106-c0db8880-5e9d-11e9-8993-9a49208c5347.png)
 
 # BitView
 
