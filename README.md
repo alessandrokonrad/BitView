@@ -14,3 +14,11 @@ When you are just interested how I connect the exchanges, then go to 'lib/utilit
 |      :---------:                  |            :------------------:           |   :----------------------:      |
 |![Screenshot_20190412-203148](https://user-images.githubusercontent.com/35738310/56078674-1f93fa00-5deb-11e9-8e73-ea9712cb013a.png)                            | ![Screenshot_20190412-203141](https://user-images.githubusercontent.com/35738310/56078688-523df280-5deb-11e9-9c9c-95116c26aed4.png) | ![Screenshot_20190412-203202](https://user-images.githubusercontent.com/35738310/56078692-5bc75a80-5deb-11e9-8cd0-4227e28116d3.png) |
                                                        
+## Things to do
+
+- [x] API support
+- [x] fix bugs for public build
+- [] add more exchanges
+- [] manual add exchanges/coins
+- [] different currency support (ony EUR at the moment)
+- [] maybe improve loading speed
