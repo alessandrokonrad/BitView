@@ -1,3 +1,5 @@
+![ic_app](https://user-images.githubusercontent.com/35738310/56089890-3c3b3b00-5e9a-11e9-9976-bc6488f2dfe1.png)
+
 # BitView
 
 A Flutter project. I built a crypto portfolio, where you can add the API of Binance, Bittrex, Coinbase and Coinbase Pro. A very simple overview of your balances and your total value. 
