@@ -4,9 +4,10 @@
 
 
 
-A Flutter project. I built a crypto portfolio, where you can add the API of Binance, Bittrex, Coinbase and Coinbase Pro. A very simple overview of your balances and your total value. 
+A Flutter project. I built a crypto portfolio with a very simple kept overview of your balances and the total value.
+You can add the balances of your exchanges via the API of Binance, Bittrex, Coinbase or Coinbase Pro.
 
-## Getting Started
+## Overview
 When you are just interested how I connect the exchanges, then go to 'lib/utility/fetch_exchange_data.dart'
 
 |                                   |                                           |                                 |
