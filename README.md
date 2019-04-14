@@ -12,7 +12,8 @@ When you are just interested how I connect the exchanges, then go to 'lib/utilit
 
 |                                   |                                           |                                 |
 |      :---------:                  |            :------------------:           |   :----------------------:      |
-|![Screenshot_20190412-203148](https://user-images.githubusercontent.com/35738310/56078674-1f93fa00-5deb-11e9-8e73-ea9712cb013a.png)                            | ![Screenshot_20190414-122234](https://user-images.githubusercontent.com/35738310/56091525-6992e380-5eb0-11e9-9811-9f5b736a7178.png) | ![Screenshot_20190412-203202](https://user-images.githubusercontent.com/35738310/56078692-5bc75a80-5deb-11e9-8cd0-4227e28116d3.png) |
+| ![Screenshot_20190412-203148_pixel_quite_black_portrait](https://user-images.githubusercontent.com/35738310/56091660-e5d9f680-5eb1-11e9-9c75-e512df390312.png) | ![Screenshot_20190414-122234_pixel_quite_black_portrait](https://user-images.githubusercontent.com/35738310/56091665-ef635e80-5eb1-11e9-9c83-63e964be68d2.png) | 
+![Screenshot_20190412-203202_pixel_quite_black_portrait](https://user-images.githubusercontent.com/35738310/56091668-f4c0a900-5eb1-11e9-85e7-bfaeffface09.png) |
                                                        
 ## Things to do
 
