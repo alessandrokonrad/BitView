@@ -11,10 +11,8 @@ You can add the balances of your exchanges via the API of Binance, Bittrex, Coin
 When you are just interested how I connect the exchanges, then go to 'lib/utility/fetch_exchange_data.dart'
 
 |                                   |                                           |                                 |
-|      :---------:                  |            :------------------:           |   :----------------------:      |
-| 
-![Balance](https://user-images.githubusercontent.com/35738310/56091858-7addef00-5eb4-11e9-8315-25f0635a320e.png) | ![Main Page](https://user-images.githubusercontent.com/35738310/56091829-220e5680-5eb4-11e9-9c5c-bc4b435dffc6.png) | 
-![Exchanges](https://user-images.githubusercontent.com/35738310/56091861-829d9380-5eb4-11e9-84e2-b1cae9c0db6d.png) |
+|      :---------:                  |            :------------------:           |   :----------------------:      | 
+| ![Balance](https://user-images.githubusercontent.com/35738310/56091858-7addef00-5eb4-11e9-8315-25f0635a320e.png) | ![Main Page](https://user-images.githubusercontent.com/35738310/56091829-220e5680-5eb4-11e9-9c5c-bc4b435dffc6.png) | ![Exchanges](https://user-images.githubusercontent.com/35738310/56091861-829d9380-5eb4-11e9-84e2-b1cae9c0db6d.png) |
                                                        
 ## Things to do
 
