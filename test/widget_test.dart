@@ -13,14 +13,14 @@ import '../lib/utility/fetch_exchange_data.dart';
 void main() {
   test('Testing HmacSha512 for Bittrex', () async {
     var exchange = {
-      'name': 'Bittrex',
+      'name': 'HitBTC',
       'icon': 'assets/bittrex.jpg',
-      'api_key': 'Put your key here',
-      'secret': 'Put your secret here',
+      'api_key': '',
+      'secret': '',
       'data': null
     };
 
-    var balances = await fetchBittrex(exchange);
+    var balances = await fetchHitBtc(exchange);
     print(balances);
   });
 }

@@ -51,7 +51,7 @@ class WalletInformation extends StatelessWidget {
           delegate: SliverChildBuilderDelegate((context, i) {
             var exchangeBalances = exchange['data']['balances'][i];
             return Container(
-                padding: EdgeInsets.only(bottom: 30, left: 60, right: 60),
+                padding: EdgeInsets.only(bottom: 30, left: 45, right: 45),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -76,7 +76,13 @@ class WalletInformation extends StatelessWidget {
                       exchangeBalances['amount'],
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold),
-                    )
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(right: 5),
+                    ),
+                    Text(exchangeBalances['value'] + ' €',
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold))
                   ],
                 ));
           }, childCount: exchange['data']['balances'].length),

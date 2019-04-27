@@ -24,7 +24,8 @@ class CryptoPortfolio extends StatefulWidget {
 class CryptoPortfolioState extends State<CryptoPortfolio> {
   var exchangesList;
   double totalValue;
-  bool _isLoading = true;
+  bool _isLoadingInitial = true;
+  bool _isLoading;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -59,6 +60,10 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
   }
 
   _loadExchangesList() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     String exchangesString = prefs.getString('exchangesList') ?? '[]';
@@ -96,10 +101,14 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
         case 'Mercatox':
           await _fetchExchange(fetchMercatox);
           break;
+        case 'HitBTC':
+          await _fetchExchange(fetchHitBtc);
+          break;
       }
     }
 
     setState(() {
+      _isLoadingInitial = false;
       _isLoading = false;
       this.exchangesList = this.exchangesList;
       this.totalValue = _total;
@@ -142,7 +151,7 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
                     .then((val) => _loadExchangesList());
               },
             )),
-        body: _isLoading
+        body: _isLoadingInitial
             ? Center(child: CircularProgressIndicator())
             : this.exchangesList.length < 1
                 ? Center(
@@ -212,7 +221,7 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
               color: Colors.yellowAccent,
               size: 15,
             ),
-            exchange['data'] != null
+            exchange['data'] != null && exchange['data']['value'] != null
                 ? Text(" Amount: ${exchange['data']['value']} €",
                     style: TextStyle(color: Colors.white))
                 : Container(
@@ -226,57 +235,85 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
         trailing:
             Icon(Icons.keyboard_arrow_right, color: Colors.white, size: 30.0));
 
-    final makeCard = Dismissible(
-        key: Key(exchange['name']),
-        onDismissed: (direction) {
-          if (direction == DismissDirection.endToStart) {
-            _deleteInfo(exchange, index);
+    var makeCard;
 
-            print(this.exchangesList);
-            setState(() {
-              this.exchangesList.remove(exchange);
-              _updateStorage();
-              if (this.exchangesList.length >= 1)
-                this.totalValue -= double.parse(exchange['data']['value']);
-              else
-                this.totalValue = 0;
-            });
-          }
-        },
-        direction: DismissDirection.endToStart,
-        background: Container(
-          padding: EdgeInsets.only(right: 20),
-          alignment: AlignmentDirectional.centerEnd,
-          child: Icon(
-            Icons.delete,
-            color: Colors.white,
-            size: 30,
+    if (_isLoading == true) {
+      makeCard = Card(
+        elevation: 10,
+        color: Colors.transparent,
+        margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+        child: InkWell(
+          child: Container(
+            decoration: BoxDecoration(
+                color: Color.fromRGBO(64, 75, 96, 0.9),
+                borderRadius: BorderRadius.circular(20)),
+            child: makeListTile,
           ),
+          onTap: () {
+            if (exchange['data'] != null && exchange['data']['value'] != null)
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      type: PageTransitionType.rightToLeft,
+                      child: WalletInformation(
+                        exchange: exchange,
+                      )));
+          },
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: Card(
-          elevation: 10,
-          color: Colors.transparent,
-          margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-          child: InkWell(
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Color.fromRGBO(64, 75, 96, 0.9),
-                  borderRadius: BorderRadius.circular(20)),
-              child: makeListTile,
+      );
+    } else {
+      makeCard = Dismissible(
+          key: Key(exchange['name']),
+          onDismissed: (direction) {
+            if (direction == DismissDirection.endToStart) {
+              _deleteInfo(exchange, index);
+              setState(() {
+                this.exchangesList.remove(exchange);
+                _updateStorage();
+                if (this.exchangesList.length >= 1)
+                  this.totalValue -= double.parse(exchange['data']['value']);
+                else
+                  this.totalValue = 0;
+              });
+            }
+          },
+          direction: DismissDirection.endToStart,
+          background: Container(
+            padding: EdgeInsets.only(right: 20),
+            alignment: AlignmentDirectional.centerEnd,
+            child: Icon(
+              Icons.delete,
+              color: Colors.white,
+              size: 30,
             ),
-            onTap: () {
-              if (exchange['data'] != null)
-                Navigator.push(
-                    context,
-                    PageTransition(
-                        type: PageTransitionType.rightToLeft,
-                        child: WalletInformation(
-                          exchange: exchange,
-                        )));
-            },
-            borderRadius: BorderRadius.circular(20),
           ),
-        ));
+          child: Card(
+            elevation: 10,
+            color: Colors.transparent,
+            margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+            child: InkWell(
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Color.fromRGBO(64, 75, 96, 0.9),
+                    borderRadius: BorderRadius.circular(20)),
+                child: makeListTile,
+              ),
+              onTap: () {
+                if (exchange['data'] != null &&
+                    exchange['data']['value'] != null)
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          type: PageTransitionType.rightToLeft,
+                          child: WalletInformation(
+                            exchange: exchange,
+                          )));
+              },
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ));
+    }
 
     return makeCard;
   }

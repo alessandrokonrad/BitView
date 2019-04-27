@@ -6,6 +6,7 @@ import 'dart:convert';
 import "package:hex/hex.dart";
 import 'package:http/http.dart';
 import 'package:crypto/crypto.dart';
+import 'package:http_auth/http_auth.dart';
 
 /* For Binance and Coinbase (HmacSHA256)*/
 
@@ -57,31 +58,35 @@ class Binance {
   }
 
   _response(request) async {
-    var response;
-    String timestamp =
-        "timestamp=" + new DateTime.now().millisecondsSinceEpoch.toString();
-    String query = request['query'] + '&' + timestamp;
-    String signature = _hmacSha256(query, this._secret);
-    var url = 'https://api.binance.com' +
-        request['endPoint'] +
-        "?" +
-        query +
-        '&signature=' +
-        signature;
+    try {
+      var response;
+      String timestamp =
+          "timestamp=" + new DateTime.now().millisecondsSinceEpoch.toString();
+      String query = request['query'] + '&' + timestamp;
+      String signature = _hmacSha256(query, this._secret);
+      var url = 'https://api.binance.com' +
+          request['endPoint'] +
+          "?" +
+          query +
+          '&signature=' +
+          signature;
 
-    if (request['method'] == 'GET') {
-      response = await get(url, headers: {'X-MBX-APIKEY': this._apiKey});
-    } else {
-      response = await post(url, headers: {'X-MBX-APIKEY': this._apiKey});
+      if (request['method'] == 'GET') {
+        response = await get(url, headers: {'X-MBX-APIKEY': this._apiKey});
+      } else {
+        response = await post(url, headers: {'X-MBX-APIKEY': this._apiKey});
+      }
+      return response;
+    } on Exception {
+      return null;
     }
-    return response;
   }
 
   getBalance() async {
     var request = {'endPoint': '/api/v3/account', 'query': '', 'method': 'GET'};
     var response = await _response(request);
 
-    if (response.statusCode == 200) {
+    if (response != null && response.statusCode == 200) {
       var result = json.decode(response.body)['balances'];
       var balance = [];
       for (var res in result) {
@@ -110,21 +115,25 @@ class Coinbase {
   }
 
   _response(request) async {
-    var timestamp = await get('https://api.coinbase.com/v2/time')
-        .then((res) => json.decode(res.body))
-        .then((res) => res['data']['epoch']);
-    String query =
-        timestamp.toString() + request['method'] + request['endPoint'];
-    String signature = _hmacSha256(query, this._secret);
-    var url = _base + request['endPoint'];
+    try {
+      var timestamp = await get('https://api.coinbase.com/v2/time')
+          .then((res) => json.decode(res.body))
+          .then((res) => res['data']['epoch']);
+      String query =
+          timestamp.toString() + request['method'] + request['endPoint'];
+      String signature = _hmacSha256(query, this._secret);
+      var url = _base + request['endPoint'];
 
-    var response = await get(url, headers: {
-      'CB-ACCESS-KEY': this._apiKey,
-      'CB-ACCESS-SIGN': signature,
-      'CB-ACCESS-TIMESTAMP': timestamp.toString()
-    });
+      var response = await get(url, headers: {
+        'CB-ACCESS-KEY': this._apiKey,
+        'CB-ACCESS-SIGN': signature,
+        'CB-ACCESS-TIMESTAMP': timestamp.toString()
+      });
 
-    return response;
+      return response;
+    } on Exception {
+      return null;
+    }
   }
 
   getBalance() async {
@@ -132,7 +141,7 @@ class Coinbase {
     var response = await this._response(request);
 
     //print(response.body);
-    if (response.statusCode == 200) {
+    if (response != null && response.statusCode == 200) {
       var result = json.decode(response.body)['data'];
       //print(result);
       var balance = [];
@@ -163,30 +172,34 @@ class CoinbasePro {
   }
 
   _response(request) async {
-    var timestamp = await get('https://api.coinbase.com/v2/time')
-        .then((res) => json.decode(res.body))
-        .then((res) => res['data']['epoch']);
-    String query = timestamp.toString() +
-        request['method'] +
-        request['endPoint'] +
-        request['body'];
-    String signature = _hmacSha256Base64(query, this._secret);
-    var url = _base + request['endPoint'];
+    try {
+      var timestamp = await get('https://api.coinbase.com/v2/time')
+          .then((res) => json.decode(res.body))
+          .then((res) => res['data']['epoch']);
+      String query = timestamp.toString() +
+          request['method'] +
+          request['endPoint'] +
+          request['body'];
+      String signature = _hmacSha256Base64(query, this._secret);
+      var url = _base + request['endPoint'];
 
-    var response = await get(url, headers: {
-      'CB-ACCESS-KEY': this._apiKey,
-      'CB-ACCESS-SIGN': signature,
-      'CB-ACCESS-TIMESTAMP': timestamp.toString(),
-      'CB-ACCESS-PASSPHRASE': this._passPhrase
-    });
-    return response;
+      var response = await get(url, headers: {
+        'CB-ACCESS-KEY': this._apiKey,
+        'CB-ACCESS-SIGN': signature,
+        'CB-ACCESS-TIMESTAMP': timestamp.toString(),
+        'CB-ACCESS-PASSPHRASE': this._passPhrase
+      });
+      return response;
+    } on Exception {
+      return null;
+    }
   }
 
   getBalance() async {
     var request = {'method': 'GET', 'endPoint': '/accounts', 'body': ''};
     var response = await this._response(request);
 
-    if (response.statusCode == 200) {
+    if (response != null && response.statusCode == 200) {
       var result = json.decode(response.body);
       //print(result);
       var balance = [];
@@ -205,29 +218,51 @@ class CoinbasePro {
   }
 }
 
-/* TODO: Mercatox */
-class Mercatox {
+class HitBtc {
   String _apiKey;
   String _secret;
-  String _base = '';
+  String _base = 'https://api.hitbtc.com';
 
-  Mercatox(String apiKey, String secret) {
+  HitBtc(String apiKey, String secret) {
     this._apiKey = apiKey;
     this._secret = secret;
   }
 
   _response(request) async {
-    var data = base64Encode((utf8.encode(json.encode(request))));
-    var input = utf8.encode('${this._secret}.${data}.${this._secret}');
-    var signature = base64Encode(sha1.convert(input).bytes);
+    try {
+      var client = BasicAuthClient(this._apiKey, this._secret);
+      var response = await client.get(this._base + request);
+
+      return response;
+    } on Exception {
+      return null;
+    }
   }
 
-  getBalance() {
-    return;
+  getBalance() async {
+    var request = '/api/2/account/balance';
+    var response = await this._response(request);
+
+    //print(response.body);
+    if (response != null && response.statusCode == 200) {
+      var result = json.decode(response.body);
+      // print(result);
+      var balance = [];
+      for (var res in result) {
+        if (double.parse(res['available']) > 0) {
+          balance.add(res);
+        }
+      }
+      return balance;
+    }
+    return null;
+
+    /* return type: [{currency:currency, available:available, 
+                      reserved:reserved}]
+       just returns those assets where balance > 0 */
   }
 }
 
-/* TODO: Bittrex */
 class Bittrex {
   String _apiKey;
   String _secret;
@@ -239,17 +274,21 @@ class Bittrex {
   }
 
   _response(request) async {
-    String timestamp =
-        "nonce=" + new DateTime.now().millisecondsSinceEpoch.toString();
-    String url =
-        _base + request + '?' + 'apikey=$_apiKey' + '&' + 'nonce=$timestamp';
-    String signature = _hmacSha512(url, this._secret);
+    try {
+      String timestamp =
+          "nonce=" + new DateTime.now().millisecondsSinceEpoch.toString();
+      String url =
+          _base + request + '?' + 'apikey=$_apiKey' + '&' + 'nonce=$timestamp';
+      String signature = _hmacSha512(url, this._secret);
 
-    var response = await get(url, headers: {
-      'apisign': signature,
-    });
+      var response = await get(url, headers: {
+        'apisign': signature,
+      });
 
-    return response;
+      return response;
+    } on Exception {
+      return null;
+    }
   }
 
   getBalance() async {
@@ -257,7 +296,7 @@ class Bittrex {
     var response = await this._response(request);
 
     //print(response.body);
-    if (response.statusCode == 200) {
+    if (response != null && response.statusCode == 200) {
       if (json.decode(response.body)['success'] == false) return null;
       var result = json.decode(response.body)['result'];
       // print(result);
@@ -294,16 +333,14 @@ fetchBinance(exchange) async {
   var wallets = [];
 
   for (var balance in balances) {
-    var icon = await _fetchIcons(balance['asset']);
     wallets.add({
       'currency': balance['asset'],
       'amount': balance['free'],
-      'icon': icon
     });
   }
 
   var data = {'balances': wallets, 'value': 0};
-  data['value'] = await _calculateAmount(data);
+  data = await _calculateAmount(data);
 
   return data;
 }
@@ -321,17 +358,16 @@ fetchCoinbase(exchange) async {
   var wallets = [];
 
   for (var balance in balances) {
-    var icon = await _fetchIcons(balance['currency']);
     wallets.add({
       'currency': balance['currency'],
       'amount': balance['amount'],
-      'icon': icon
     });
   }
 
   var data = {'balances': wallets, 'value': 0};
 
-  data['value'] = await _calculateAmount(data);
+  data = await _calculateAmount(data);
+  print(data);
 
   return data;
 }
@@ -350,17 +386,15 @@ fetchCoinbasePro(exchange) async {
   var wallets = [];
 
   for (var balance in balances) {
-    var icon = await _fetchIcons(balance['currency']);
     wallets.add({
       'currency': balance['currency'],
       'amount': balance['balance'],
-      'icon': icon
     });
   }
 
   var data = {'balances': wallets, 'value': 0};
 
-  data['value'] = await _calculateAmount(data);
+  data = await _calculateAmount(data);
 
   return data;
 }
@@ -378,19 +412,46 @@ fetchBittrex(exchange) async {
   var wallets = [];
 
   for (var balance in balances) {
-    var icon = await _fetchIcons(balance['Currency']);
     //print(balance['Balance']);
     wallets.add({
       'currency': balance['Currency'],
       'amount': balance['Balance']
           .toStringAsFixed(9), //represents amount with 9 digits
-      'icon': icon
     });
   }
 
   var data = {'balances': wallets, 'value': 0};
 
-  data['value'] = await _calculateAmount(data);
+  data = await _calculateAmount(data);
+
+  return data;
+}
+
+fetchHitBtc(exchange) async {
+  final APIKEY = exchange['api_key'];
+  final SECRET = exchange['secret'];
+
+  final hitBtc = new HitBtc(APIKEY, SECRET);
+  var balances = await hitBtc.getBalance();
+  if (balances == null) {
+    return null;
+  }
+
+  print(balances);
+
+  var wallets = [];
+
+  for (var balance in balances) {
+    //print(balance['Balance']);
+    wallets.add({
+      'currency': balance['currency'],
+      'amount': balance['available'],
+    });
+  }
+
+  var data = {'balances': wallets, 'value': 0};
+
+  data = await _calculateAmount(data);
 
   return data;
 }
@@ -399,65 +460,81 @@ fetchMercatox(exchange) async {
   var balances = exchange['data']['balances'];
   var wallets = [];
 
-  for (var balance in balances) {
-    var icon = await _fetchIcons(balance['currency']);
-    //print(balance['Balance']);
-    wallets.add({
-      'currency': balance['currency'],
-      'amount': balance['amount'],
-      'icon': icon
-    });
+  try {
+    for (var balance in balances) {
+      if (balance['currency'] == '' || balance['amount'] == '') return null;
+
+      //print(balance['Balance']);
+      wallets.add({
+        'currency': balance['currency'],
+        'amount': balance['amount'],
+      });
+    }
+
+    var data = {'balances': wallets, 'value': 0};
+
+    data = await _calculateAmount(data);
+
+    return data;
+  } on Exception {
+    return null;
   }
-
-  var data = {'balances': wallets, 'value': 0};
-
-  data['value'] = await _calculateAmount(data);
-
-  return data;
 }
 
 /*calculates value of of all currencies in wallet in EUR */
 
-_calculateAmount(balances) async {
-  var url = 'https://api.cryptonator.com/api/ticker';
+_calculateAmount(data) async {
+  //var url = 'https://api.cryptonator.com/api/ticker';
+  var url = 'https://pro-api.coinmarketcap.com';
   //var result = [];
   double result = 0;
-  var wallets = balances['balances'];
+  var wallets = data['balances'];
 
-  for (var wallet in wallets) {
-    var currency = wallet['currency'];
-    var amount = double.parse(wallet['amount']);
-    var response = await get(url + '/$currency-EUR');
-    var success = json.decode(response.body)['success'];
-    double currencyPrice = 0;
-    if (success) {
-      currencyPrice =
-          double.parse(json.decode(response.body)['ticker']['price']);
+  try {
+    for (var wallet in wallets) {
+      var currency = wallet['currency'];
+      var amount = double.parse(wallet['amount']);
+      var response = await get(
+          url + '/v1/cryptocurrency/quotes/latest?symbol=$currency&convert=EUR',
+          headers: {
+            'X-CMC_PRO_API_KEY': 'c3f0b0d3-a892-4e5d-a913-30aefd092737'
+          });
+
+      double currencyPrice = 0;
+
+      double eur;
+
+      var icon;
+      if (currency == 'EUR') {
+        eur = amount;
+        wallet['value'] = eur.toStringAsFixed(2);
+
+        icon = _fetchIcons('EUR');
+      } else {
+        currencyPrice = json.decode(response.body)['data']['$currency']['quote']
+            ['EUR']['price'];
+
+        eur = currencyPrice * amount;
+        wallet['value'] = eur.toStringAsFixed(2);
+        var id = json.decode(response.body)['data']['$currency']['id'];
+        icon = _fetchIcons(id);
+      }
+      result += eur;
+
+      wallet['icon'] = icon;
     }
-    double eur = currencyPrice * amount;
-    result += eur;
-  }
 
-  return result.toStringAsFixed(2);
+    data['value'] = result.toStringAsFixed(2);
+
+    return data;
+  } on Exception {
+    return null;
+  }
 }
 
-_fetchIcons(currency) async {
-  if (currency == 'EUR')
+_fetchIcons(id) {
+  if (id == 'EUR')
     return 'https://cdn3.iconfinder.com/data/icons/basicolor-money-finance/24/224_euro_eur_currency-512.png';
 
-  var coinList = await get(
-          'https://s2.coinmarketcap.com/generated/search/quick_search.json')
-      .then((res) => json.decode(res.body));
-
-  var id;
-
-  for (int i = 0; i < coinList.length; i++) {
-    if (coinList[i]['symbol'] == currency) {
-      id = coinList[i]['id'];
-      break;
-    }
-  }
-  // print(currency);
-  // print(id);
   return 'https://s2.coinmarketcap.com/static/img/coins/128x128/$id.png';
 }

@@ -48,9 +48,6 @@ class ExchangeRegisterManuallyState extends State<ExchangeRegisterManually> {
         ),
         body: Column(
           children: <Widget>[
-            // Padding(
-            //   padding: EdgeInsets.only(top: 20),
-            // ),
             Expanded(
               child: ListView.builder(
                   itemCount: _currencyList.length + 1,
@@ -68,10 +65,13 @@ class ExchangeRegisterManuallyState extends State<ExchangeRegisterManually> {
                 style: TextStyle(color: Colors.white),
               ),
               onPressed: () {
-                _setExchangesList();
+                if (_currencyList.length > 0) {
+                  print(_currencyList);
+                  _setExchangesList();
 
-                Navigator.pop(context);
-                Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                }
               },
             )
           ],

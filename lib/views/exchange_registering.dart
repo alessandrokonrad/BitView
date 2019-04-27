@@ -98,9 +98,9 @@ class ExchangeRegisterState extends State<ExchangeRegister> {
                               formKey.currentState.save();
                               this._exchange['api_key'] = _apiKey;
                               this._exchange['secret'] = _secret;
-                              this._exchange['name'] == 'Coinbase Pro'
-                                  ? this._exchange['pass_phrase'] = _passPhrase
-                                  : null;
+                              if (this._exchange['name'] == 'Coinbase Pro')
+                                this._exchange['pass_phrase'] = _passPhrase;
+
                               _setExchangesList();
 
                               Navigator.pop(context);

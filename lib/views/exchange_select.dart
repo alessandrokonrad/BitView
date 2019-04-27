@@ -35,11 +35,10 @@ class ExchangeSelect extends StatelessWidget {
       'secret': null,
       'data': null
     },
-
-    // TODO: Implement Mercatox
+    {'name': 'Mercatox', 'icon': 'assets/mercatox.png', 'data': null},
     {
-      'name': 'Mercatox',
-      'icon': 'assets/mercatox.png',
+      'name': 'HitBTC',
+      'icon': 'assets/hitbtc.png',
       'api_key': null,
       'secret': null,
       'data': null
