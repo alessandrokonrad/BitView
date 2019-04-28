@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 class WalletInformation extends StatelessWidget {
-  const WalletInformation({Key key, this.exchange}) : super(key: key);
+  const WalletInformation({Key key, this.exchange, this.fiatSymbol})
+      : super(key: key);
 
   final exchange;
+  final fiatSymbol;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +32,7 @@ class WalletInformation extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.only(top: 30),
                 ),
-                Text(exchange['data']['value'] + ' €',
+                Text(exchange['data']['value'] + ' ' + fiatSymbol,
                     style: TextStyle(
                         fontSize: 30,
                         color: Colors.white,
@@ -80,7 +82,7 @@ class WalletInformation extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.only(right: 5),
                     ),
-                    Text(exchangeBalances['value'] + ' €',
+                    Text(exchangeBalances['value'] + ' ' + fiatSymbol,
                         style: TextStyle(
                             color: Colors.black, fontWeight: FontWeight.bold))
                   ],

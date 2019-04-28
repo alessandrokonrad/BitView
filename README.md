@@ -21,7 +21,7 @@ When you are just interested how I connect the exchanges, then go to 'lib/utilit
 - [x] API support
 - [x] fix bugs for public build
 - [x] add fiat value to specific coin
-- [ ] add more exchanges
+- [ ] add more exchanges(HitBTC recenetly added)
 - [ ] manual add exchanges/coins
-- [ ] different currency support (ony EUR at the moment)
+- [x] different currency support (ony EUR at the moment)
 - [x] maybe improve loading speed

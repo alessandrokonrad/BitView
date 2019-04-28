@@ -26,6 +26,22 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
   double totalValue;
   bool _isLoadingInitial = true;
   bool _isLoading;
+  var fiatListDrop = [
+    PopupMenuItem(
+      child: Text("USD \$"),
+      value: "USD",
+    ),
+    PopupMenuItem(
+      child: Text("EUR €"),
+      value: "EUR",
+    ),
+    PopupMenuItem(
+      child: Text("GBP £"),
+      value: "GBP",
+    )
+  ];
+  String _fiatCurrencySymbol = '€';
+  String _fiatCurrency = 'EUR';
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -43,6 +59,30 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
         },
       ),
     ));
+  }
+
+  _getFiatCurrency(fiat) async {
+    setState(() {
+      this._isLoadingInitial = true;
+    });
+    var fiatSymbol;
+    switch (fiat) {
+      case 'USD':
+        fiatSymbol = "\$";
+        break;
+      case 'EUR':
+        fiatSymbol = "€";
+        break;
+      case 'GBP':
+        fiatSymbol = "£";
+        break;
+    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    prefs.setString('fiatCurrency', fiat);
+    prefs.setString('fiatCurrencySymbol', fiatSymbol);
+
+    this._loadExchangesList();
   }
 
   _handleError() {
@@ -68,16 +108,21 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
 
     String exchangesString = prefs.getString('exchangesList') ?? '[]';
 
+    setState(() {
+      this._fiatCurrency = prefs.getString('fiatCurrency') ?? 'EUR';
+      this._fiatCurrencySymbol = prefs.getString('fiatCurrencySymbol') ?? '€';
+    });
     this.exchangesList = json.decode(exchangesString);
 
+    print(this._fiatCurrency);
     /* displays totalValue and then updates its value */
 
     double _total = 0;
 
     for (var i = 0; i < this.exchangesList.length; i++) {
       var exchange = this.exchangesList[i];
-      _fetchExchange(Function fetcher) async {
-        var data = await fetcher(exchange);
+      _fetchExchange(Function fetcher, fiat) async {
+        var data = await fetcher(exchange, fiat);
         if (data != null && data is! String) {
           exchange['data'] = data;
           _total += double.parse(data['value']);
@@ -87,22 +132,22 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
 
       switch (exchange['name']) {
         case 'Coinbase':
-          await _fetchExchange(fetchCoinbase);
+          await _fetchExchange(fetchCoinbase, this._fiatCurrency);
           break;
         case 'Coinbase Pro':
-          await _fetchExchange(fetchCoinbasePro);
+          await _fetchExchange(fetchCoinbasePro, this._fiatCurrency);
           break;
         case 'Bittrex':
-          await _fetchExchange(fetchBittrex);
+          await _fetchExchange(fetchBittrex, this._fiatCurrency);
           break;
         case 'Binance':
-          await _fetchExchange(fetchBinance);
+          await _fetchExchange(fetchBinance, this._fiatCurrency);
           break;
         case 'Mercatox':
-          await _fetchExchange(fetchMercatox);
+          await _fetchExchange(fetchMercatox, this._fiatCurrency);
           break;
         case 'HitBTC':
-          await _fetchExchange(fetchHitBtc);
+          await _fetchExchange(fetchHitBtc, this._fiatCurrency);
           break;
       }
     }
@@ -137,6 +182,15 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
         appBar: AppBar(
           centerTitle: true,
           title: Text("BitView"),
+          actions: <Widget>[
+            PopupMenuButton(
+              itemBuilder: (context) => fiatListDrop,
+              onSelected: (value) {
+                this._getFiatCurrency(value);
+              },
+              icon: Icon(Icons.attach_money),
+            )
+          ],
         ),
         floatingActionButton: Container(
             width: 90,
@@ -177,7 +231,9 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
                           flexibleSpace: Container(
                             child: Center(
                                 child: Text(
-                                    this.totalValue.toStringAsFixed(2) + ' €',
+                                    this.totalValue.toStringAsFixed(2) +
+                                        ' ' +
+                                        this._fiatCurrencySymbol,
                                     style: TextStyle(
                                         fontSize: 30,
                                         color: Colors.white,
@@ -222,7 +278,9 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
               size: 15,
             ),
             exchange['data'] != null && exchange['data']['value'] != null
-                ? Text(" Amount: ${exchange['data']['value']} €",
+                ? Text(
+                    " Amount: ${exchange['data']['value']} " +
+                        this._fiatCurrencySymbol,
                     style: TextStyle(color: Colors.white))
                 : Container(
                     margin: EdgeInsets.only(left: 10),
@@ -237,83 +295,55 @@ class CryptoPortfolioState extends State<CryptoPortfolio> {
 
     var makeCard;
 
-    if (_isLoading == true) {
-      makeCard = Card(
-        elevation: 10,
-        color: Colors.transparent,
-        margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-        child: InkWell(
-          child: Container(
-            decoration: BoxDecoration(
-                color: Color.fromRGBO(64, 75, 96, 0.9),
-                borderRadius: BorderRadius.circular(20)),
-            child: makeListTile,
+    makeCard = Dismissible(
+        key: Key(exchange['name']),
+        onDismissed: (direction) {
+          if (direction == DismissDirection.endToStart) {
+            _deleteInfo(exchange, index);
+            setState(() {
+              this.exchangesList.remove(exchange);
+              _updateStorage();
+              if (this.exchangesList.length >= 1)
+                this.totalValue -= double.parse(exchange['data']['value']);
+              else
+                this.totalValue = 0;
+            });
+          }
+        },
+        direction: DismissDirection.endToStart,
+        background: Container(
+          padding: EdgeInsets.only(right: 20),
+          alignment: AlignmentDirectional.centerEnd,
+          child: Icon(
+            Icons.delete,
+            color: Colors.white,
+            size: 30,
           ),
-          onTap: () {
-            if (exchange['data'] != null && exchange['data']['value'] != null)
-              Navigator.push(
-                  context,
-                  PageTransition(
-                      type: PageTransitionType.rightToLeft,
-                      child: WalletInformation(
-                        exchange: exchange,
-                      )));
-          },
-          borderRadius: BorderRadius.circular(20),
         ),
-      );
-    } else {
-      makeCard = Dismissible(
-          key: Key(exchange['name']),
-          onDismissed: (direction) {
-            if (direction == DismissDirection.endToStart) {
-              _deleteInfo(exchange, index);
-              setState(() {
-                this.exchangesList.remove(exchange);
-                _updateStorage();
-                if (this.exchangesList.length >= 1)
-                  this.totalValue -= double.parse(exchange['data']['value']);
-                else
-                  this.totalValue = 0;
-              });
-            }
-          },
-          direction: DismissDirection.endToStart,
-          background: Container(
-            padding: EdgeInsets.only(right: 20),
-            alignment: AlignmentDirectional.centerEnd,
-            child: Icon(
-              Icons.delete,
-              color: Colors.white,
-              size: 30,
+        child: Card(
+          elevation: 10,
+          color: Colors.transparent,
+          margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+          child: InkWell(
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Color.fromRGBO(64, 75, 96, 0.9),
+                  borderRadius: BorderRadius.circular(20)),
+              child: makeListTile,
             ),
-          ),
-          child: Card(
-            elevation: 10,
-            color: Colors.transparent,
-            margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-            child: InkWell(
-              child: Container(
-                decoration: BoxDecoration(
-                    color: Color.fromRGBO(64, 75, 96, 0.9),
-                    borderRadius: BorderRadius.circular(20)),
-                child: makeListTile,
-              ),
-              onTap: () {
-                if (exchange['data'] != null &&
-                    exchange['data']['value'] != null)
-                  Navigator.push(
-                      context,
-                      PageTransition(
-                          type: PageTransitionType.rightToLeft,
-                          child: WalletInformation(
+            onTap: () {
+              if (exchange['data'] != null && exchange['data']['value'] != null)
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        type: PageTransitionType.rightToLeft,
+                        child: WalletInformation(
                             exchange: exchange,
-                          )));
-              },
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ));
-    }
+                            fiatSymbol: this._fiatCurrencySymbol)));
+            },
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ));
 
     return makeCard;
   }

@@ -320,7 +320,7 @@ class Bittrex {
 
 /* fetches balances and formats them */
 
-fetchBinance(exchange) async {
+fetchBinance(exchange, fiat) async {
   final APIKEY = exchange['api_key'];
   final SECRET = exchange['secret'];
 
@@ -340,12 +340,12 @@ fetchBinance(exchange) async {
   }
 
   var data = {'balances': wallets, 'value': 0};
-  data = await _calculateAmount(data);
+  data = await _calculateAmount(data, fiat);
 
   return data;
 }
 
-fetchCoinbase(exchange) async {
+fetchCoinbase(exchange, fiat) async {
   final APIKEY = exchange['api_key'];
   final SECRET = exchange['secret'];
 
@@ -366,13 +366,13 @@ fetchCoinbase(exchange) async {
 
   var data = {'balances': wallets, 'value': 0};
 
-  data = await _calculateAmount(data);
+  data = await _calculateAmount(data, fiat);
   print(data);
 
   return data;
 }
 
-fetchCoinbasePro(exchange) async {
+fetchCoinbasePro(exchange, fiat) async {
   final APIKEY = exchange['api_key'];
   final SECRET = exchange['secret'];
   final PASSPHRASE = exchange['pass_phrase'];
@@ -394,12 +394,12 @@ fetchCoinbasePro(exchange) async {
 
   var data = {'balances': wallets, 'value': 0};
 
-  data = await _calculateAmount(data);
+  data = await _calculateAmount(data, fiat);
 
   return data;
 }
 
-fetchBittrex(exchange) async {
+fetchBittrex(exchange, fiat) async {
   final APIKEY = exchange['api_key'];
   final SECRET = exchange['secret'];
 
@@ -422,12 +422,12 @@ fetchBittrex(exchange) async {
 
   var data = {'balances': wallets, 'value': 0};
 
-  data = await _calculateAmount(data);
+  data = await _calculateAmount(data, fiat);
 
   return data;
 }
 
-fetchHitBtc(exchange) async {
+fetchHitBtc(exchange, fiat) async {
   final APIKEY = exchange['api_key'];
   final SECRET = exchange['secret'];
 
@@ -451,12 +451,12 @@ fetchHitBtc(exchange) async {
 
   var data = {'balances': wallets, 'value': 0};
 
-  data = await _calculateAmount(data);
+  data = await _calculateAmount(data, fiat);
 
   return data;
 }
 
-fetchMercatox(exchange) async {
+fetchMercatox(exchange, fiat) async {
   var balances = exchange['data']['balances'];
   var wallets = [];
 
@@ -473,7 +473,7 @@ fetchMercatox(exchange) async {
 
     var data = {'balances': wallets, 'value': 0};
 
-    data = await _calculateAmount(data);
+    data = await _calculateAmount(data, fiat);
 
     return data;
   } on Exception {
@@ -483,9 +483,10 @@ fetchMercatox(exchange) async {
 
 /*calculates value of of all currencies in wallet in EUR */
 
-_calculateAmount(data) async {
-  //var url = 'https://api.cryptonator.com/api/ticker';
-  var url = 'https://pro-api.coinmarketcap.com';
+_calculateAmount(data, fiat) async {
+  var coingecko = await get('https://api.coingecko.com/api/v3/coins/list')
+      .then((res) => json.decode(res.body));
+  var id;
   //var result = [];
   double result = 0;
   var wallets = data['balances'];
@@ -494,33 +495,46 @@ _calculateAmount(data) async {
     for (var wallet in wallets) {
       var currency = wallet['currency'];
       var amount = double.parse(wallet['amount']);
-      var response = await get(
-          url + '/v1/cryptocurrency/quotes/latest?symbol=$currency&convert=EUR',
-          headers: {
-            'X-CMC_PRO_API_KEY': 'c3f0b0d3-a892-4e5d-a913-30aefd092737'
-          });
 
       double currencyPrice = 0;
 
       double eur;
 
       var icon;
-      if (currency == 'EUR') {
-        eur = amount;
-        wallet['value'] = eur.toStringAsFixed(2);
+      if (currency == 'EUR' || currency == 'USD' || currency == 'GBP') {
+        if (currency == fiat) {
+          eur = amount;
+          wallet['value'] = eur.toStringAsFixed(2);
+        } else {
+          var exchangeRate = await get(
+                  'https://api.exchangeratesapi.io/latest?base=$currency&symbols=$fiat')
+              .then((res) => json.decode(res.body)['rates'][fiat]);
+          eur = amount * exchangeRate;
+          wallet['value'] = eur.toStringAsFixed(2);
+        }
 
-        icon = _fetchIcons('EUR');
+        icon = _fetchIcons(currency);
       } else {
-        currencyPrice = json.decode(response.body)['data']['$currency']['quote']
-            ['EUR']['price'];
+        for (int i = 0; i < coingecko.length; i++) {
+          if (currency == coingecko[i]['symbol'].toUpperCase()) {
+            id = coingecko[i]['id'];
+            break;
+          }
+        }
+
+        var response = await get(
+                'https://api.coingecko.com/api/v3/coins/markets?vs_currency=${fiat.toLowerCase()}&ids=$id')
+            .then((res) => json.decode(res.body));
+
+        currencyPrice = double.parse(response[0]['current_price'].toString());
 
         eur = currencyPrice * amount;
         wallet['value'] = eur.toStringAsFixed(2);
-        var id = json.decode(response.body)['data']['$currency']['id'];
-        icon = _fetchIcons(id);
+        icon = response[0]['image'];
       }
       result += eur;
-
+      print(result);
+      print(icon);
       wallet['icon'] = icon;
     }
 
@@ -534,7 +548,10 @@ _calculateAmount(data) async {
 
 _fetchIcons(id) {
   if (id == 'EUR')
-    return 'https://cdn3.iconfinder.com/data/icons/basicolor-money-finance/24/224_euro_eur_currency-512.png';
-
-  return 'https://s2.coinmarketcap.com/static/img/coins/128x128/$id.png';
+    return 'http://cdn.onlinewebfonts.com/svg/img_408170.png';
+  else if (id == 'GBP')
+    return 'http://cdn.onlinewebfonts.com/svg/img_221173.png';
+  else if (id == 'USD') {
+    return 'http://cdn.onlinewebfonts.com/svg/img_455423.png';
+  }
 }
